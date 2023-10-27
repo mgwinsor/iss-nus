@@ -1,0 +1,21 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: code-ns
+  labels:
+    app: code
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: code-cm
+  namespace: code-ns
+  labels:
+    app: codeserver
+    name: code-cm
+data:
+  TZ: Asia/Singapore
+  DEFAULT_WORKSPACE: /config/workspace
+  PROXY_DOMAIN: code-server.146.190.194.35.nip.io

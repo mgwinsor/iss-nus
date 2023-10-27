@@ -1,0 +1,54 @@
+---
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  bggapp-deploy
+  namespace: bggns
+  labels:
+    app:  bgg
+    name:  bggapp-deploy
+spec:
+  selector:
+    matchLabels:
+      app: bgg
+      name: bggapp-po
+  replicas: 2
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app:  bgg
+        name: bggapp-po
+    spec:
+      containers:
+      - name:  bggapp-container
+        image:  stackupiss/bgg-backend:v1
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: bgg-cm
+        - secretRef:
+            name: bgg-secret 
+        ports:
+        - containerPort:  3000
+
+---
+# https://kubernetes.io/docs/concepts/services-networking/service/
+apiVersion: v1
+kind: Service
+metadata:
+  name: bggapp-svc
+  namespace: bggns
+spec:
+  selector:
+    app: bgg
+    name: bggapp-po
+  type: NodePort
+  ports:
+  - port: 3000
+    targetPort: 3000

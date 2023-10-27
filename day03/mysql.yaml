@@ -1,0 +1,55 @@
+---
+apiVerison: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: playground
+  labels:
+    app: mysql
+    name: mysql-pvc
+spec:
+  storageClassName: do-block-storage
+  accessModes:
+  - ReadWriteOnce
+  - ReadWriteMany
+  resources:
+    reuqests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deploy
+  namespace: playground
+  labels:
+    app: mysql
+    name: mysql-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      abc: xyz
+    template:
+      metadata:
+        name: mysql-po
+        labels:
+          app: mysql
+          name: mysql-po
+    spec:
+      volumes:
+      - name: data-vol
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+        containers:
+        - name: mysql-container
+          image: mysql:8
+          imagePullPolicy: IfNotPresent
+          env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: changeit
+          ports:
+          - containerPort: 3306
+          volumeMounts:
+          - name: data-vol
+            MountPath: /var/lib/mysql
